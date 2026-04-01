@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "input.h"
 #include "tokenize.h"
+#include "exec.h"
 
 int main(void){
     while(1){
@@ -21,12 +23,15 @@ int main(void){
         char normalized_line[100];
         normalize(line, normalized_line);
         if (normalized_line[0] == '\0') continue;
-        printf("%s\n", normalized_line);
+        //printf("%s\n", normalized_line);
         if (strcmp(normalized_line, "exit()") == 0) return 0;
 
         char *tokens[10];
         tokenize(normalized_line, tokens);
-        print_tokens(tokens);
+
+        execute(tokens);
+        //print_tokens(tokens);
+        free_memory_of_tokens(tokens);
     }
     return 0;
 }

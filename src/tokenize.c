@@ -38,3 +38,13 @@ void print_tokens(char *tokens[]) {
         i++;
     }
 }
+
+void free_memory_of_tokens(char *tokens[]) {
+    int index = 0;
+
+    while (tokens[index] != NULL) {
+        free(tokens[index]);
+        tokens[index] = NULL;
+        index++;
+    }
+}
