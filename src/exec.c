@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 int execute(char *tokens[]){
-    if(tokens == NULL || tokens[0] == NULL) return 1;
+    if(tokens == NULL || tokens[0] == NULL) return 0;
     int child_process = fork();
     if(child_process < 0){
         fprintf(stderr, "Fork failed\n");
@@ -12,9 +12,8 @@ int execute(char *tokens[]){
     }
     else if (child_process == 0){
         execvp(tokens[0], tokens);
-
-        //needs error handling why this fails
-        exit(1);
+        perror(tokens[0]);
+        _exit(127);
     }
     else {
         int status;
