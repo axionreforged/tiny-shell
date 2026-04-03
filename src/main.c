@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
+#include <unistd.h>
+#include "exec.h"
 #include "input.h"
 #include "tokenize.h"
-#include "exec.h"
 
-int main(void){
-    while(1){
+int main(void) {
+    while (1) {
         printf("prompt>");
         fflush(stdout);
 
@@ -22,16 +22,37 @@ int main(void){
 
         char normalized_line[100];
         normalize(line, normalized_line);
-        if (normalized_line[0] == '\0') continue;
-        //printf("%s\n", normalized_line);
-        if (strcmp(normalized_line, "exit()") == 0) return 0;
+
+        if (normalized_line[0] == '\0') {
+            continue;
+        }
 
         char *tokens[10];
         tokenize(normalized_line, tokens);
 
+        if (tokens[0] == NULL) {
+            free_memory_of_tokens(tokens);
+            continue;
+        }
+
+        if (strcmp(tokens[0], "exit") == 0) {
+            free_memory_of_tokens(tokens);
+            return 0;
+        }
+
+        if (strcmp(tokens[0], "cd") == 0) {
+            if (tokens[1] != NULL) {
+                if (chdir(tokens[1]) < 0) {
+                    perror("cd");
+                }
+            }
+            free_memory_of_tokens(tokens);
+            continue;
+        }
+
         execute(tokens);
-        //print_tokens(tokens);
         free_memory_of_tokens(tokens);
     }
+
     return 0;
 }

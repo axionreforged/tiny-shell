@@ -1,33 +1,64 @@
-#include "input.h"
+#include "tokenize.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-void tokenize(const char* line, char *tokens[]){
-    char normalized_line[100];
-    normalize(line, normalized_line);
-    char c = normalized_line[0];
+void tokenize(const char *line, char *tokens[]) {
     int line_index = 0;
-    int token_index = -1;
-    int word_index = 0;
-    bool new_word = true;
-    while(c != '\0'){
-        if(c == ' ') new_word = true;
-        else{
-            if(new_word){
-                word_index = 0;
-                token_index++;
-                tokens[token_index] = malloc(11);
-            }
-            new_word = false;
-            tokens[token_index][word_index] = c;
-            word_index++;
-            tokens[token_index][word_index] = '\0';
+    int token_index = 0;
+
+    while (line[line_index] != '\0') {
+        while (line[line_index] == ' ') {
+            line_index++;
         }
-        line_index++;
-        c = normalized_line[line_index];
+
+        if (line[line_index] == '\0') {
+            break;
+        }
+
+        if (token_index >= 9) {
+            break;
+        }
+
+        if (line[line_index] == '>' || line[line_index] == '<') {
+            tokens[token_index] = malloc(2);
+            if (tokens[token_index] == NULL) {
+                perror("malloc");
+                break;
+            }
+
+            tokens[token_index][0] = line[line_index];
+            tokens[token_index][1] = '\0';
+            token_index++;
+            line_index++;
+            continue;
+        }
+
+        tokens[token_index] = malloc(101);
+        if (tokens[token_index] == NULL) {
+            perror("malloc");
+            break;
+        }
+
+        int word_index = 0;
+
+        while (line[line_index] != '\0' &&
+               line[line_index] != ' ' &&
+               line[line_index] != '>' &&
+               line[line_index] != '<') {
+            if (word_index < 100) {
+                tokens[token_index][word_index] = line[line_index];
+                word_index++;
+            }
+            line_index++;
+        }
+
+        tokens[token_index][word_index] = '\0';
+        token_index++;
     }
-    tokens[token_index + 1] = NULL;
+
+    tokens[token_index] = NULL;
 }
 
 void print_tokens(char *tokens[]) {
