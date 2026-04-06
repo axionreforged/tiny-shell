@@ -107,3 +107,4 @@ char *normalize(const char *line, char *normalized_line) {
     remove_last_and_first_spaces(no_enter_line, normalized_line);
     return normalized_line;
 }
+

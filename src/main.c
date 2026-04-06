@@ -28,7 +28,9 @@ int main(void) {
         }
 
         char *tokens[10];
-        tokenize(normalized_line, tokens);
+        char *cmd1[10];
+        char *cmd2[10];
+        enum pipe_status status_parser = parser(normalized_line, tokens, cmd1, cmd2);
 
         if (tokens[0] == NULL) {
             free_memory_of_tokens(tokens);
@@ -49,10 +51,26 @@ int main(void) {
             free_memory_of_tokens(tokens);
             continue;
         }
+        if(status_parser == NO_PIPE) execute(tokens, 0, cmd1, cmd2);
 
-        execute(tokens);
+        else if(status_parser == PIPE_VALID) execute(tokens, 1, cmd1, cmd2);
+
+        else if(status_parser == NO_LEFT_COMMAND){
+            free_memory_of_tokens(tokens);
+            fprintf(stderr, "No left command for pipe\n");
+            continue;
+        }
+        else if(status_parser == NO_RIGHT_COMMAND){
+            free_memory_of_tokens(tokens);
+            fprintf(stderr, "No right command for pipe\n");
+            continue;
+        }
+        else if(status_parser == MORE_THAN_ONE_PIPE){
+            free_memory_of_tokens(tokens);
+            fprintf(stderr, "More than one pipe\n");
+            continue;
+        }
         free_memory_of_tokens(tokens);
     }
-
     return 0;
 }
