@@ -10,7 +10,7 @@ int main(void) {
         printf("prompt>");
         fflush(stdout);
 
-        char line[100];
+        char line[MAX_LINE];
         if (fgets(line, sizeof line, stdin) == NULL) {
             if (feof(stdin)) {
                 printf("\n");
@@ -20,16 +20,23 @@ int main(void) {
             return 1;
         }
 
-        char normalized_line[100];
+        if (strchr(line, '\n') == NULL && !feof(stdin)) {
+            int c;
+            while ((c = fgetc(stdin)) != '\n' && c != EOF);
+            fprintf(stderr, "Input too long\n");
+            continue;
+        }
+
+        char normalized_line[MAX_LINE];
         normalize(line, normalized_line);
 
         if (normalized_line[0] == '\0') {
             continue;
         }
 
-        char *tokens[10];
-        char *cmd1[10];
-        char *cmd2[10];
+        char *tokens[MAX_TOKENS];
+        char *cmd1[MAX_TOKENS];
+        char *cmd2[MAX_TOKENS];
         enum pipe_status status_parser = parser(normalized_line, tokens, cmd1, cmd2);
 
         if (tokens[0] == NULL) {
@@ -51,25 +58,20 @@ int main(void) {
             free_memory_of_tokens(tokens);
             continue;
         }
-        if(status_parser == NO_PIPE) execute(tokens, 0, cmd1, cmd2);
+        if (status_parser == NO_PIPE || status_parser == PIPE_VALID) {
+            execute(tokens, status_parser, cmd1, cmd2);
+        } else {
+            if (status_parser == NO_LEFT_COMMAND)
+                fprintf(stderr, "No left command for pipe\n");
+            else if (status_parser == NO_RIGHT_COMMAND)
+                fprintf(stderr, "No right command for pipe\n");
+            else if (status_parser == MORE_THAN_ONE_PIPE)
+                fprintf(stderr, "More than one pipe\n");
+        
+            free_memory_of_tokens(tokens);
+            continue;
+        }
 
-        else if(status_parser == PIPE_VALID) execute(tokens, 1, cmd1, cmd2);
-
-        else if(status_parser == NO_LEFT_COMMAND){
-            free_memory_of_tokens(tokens);
-            fprintf(stderr, "No left command for pipe\n");
-            continue;
-        }
-        else if(status_parser == NO_RIGHT_COMMAND){
-            free_memory_of_tokens(tokens);
-            fprintf(stderr, "No right command for pipe\n");
-            continue;
-        }
-        else if(status_parser == MORE_THAN_ONE_PIPE){
-            free_memory_of_tokens(tokens);
-            fprintf(stderr, "More than one pipe\n");
-            continue;
-        }
         free_memory_of_tokens(tokens);
     }
     return 0;

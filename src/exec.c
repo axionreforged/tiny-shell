@@ -46,7 +46,7 @@ static int prepare_for_execution(char *tokens[], char *argv[], char **input_file
             return -1;
         }
         else {
-            if (arg_index >= 9) {
+            if (arg_index >= MAX_TOKENS - 1) {
                 fprintf(stderr, "too many arguments\n");
                 return -1;
             }
@@ -68,7 +68,7 @@ static int prepare_for_execution(char *tokens[], char *argv[], char **input_file
 }
 
 static void run_command_in_child(char *tokens[], int inherited_stdin, int inherited_stdout) {
-    char *argv[10];
+    char *argv[MAX_TOKENS];
     char *input_file = NULL;
     char *output_file = NULL;
 
@@ -226,12 +226,12 @@ int execute_pipe(char *cmd1[], char *cmd2[]) {
     return 0;
 }
 
-int execute(char *tokens[], int pipe_execution, char *cmd1[], char *cmd2[]) {
+int execute(char *tokens[], enum pipe_status status, char *cmd1[], char *cmd2[]) {
     if (tokens == NULL || tokens[0] == NULL) {
         return 0;
     }
 
-    if (pipe_execution == 0) {
+    if (status == NO_PIPE) {
         return execute_single_command(tokens);
     }
 
